@@ -1,40 +1,36 @@
-; Find the sum of all the multiples of 3 or 5 below 1000
+(local u (require :utils))
 
-; mutable ver - more readable?
-(fn p1 []
-  (var s 0)
-  (for [i 1 999]
-    (if (or (= 0 (% i 5)) (= 0 (% i 3)))
-      (set s (+ s i))))
-  s)
-
-; immutable, recursive ver - cooler?
-(lambda p1p [?n ?s]
+;; PROBLEM 1
+;; Find the sum of all the multiples of 3 or 5 below 1000
+; immutable, tail-recursive version - cool!
+(lambda p1 [?n ?s]
   (let [nn (or ?n 0)
         ss (or ?s 0)]
     (if (= nn 1000)
       ss
-      (p1p (+ nn 1) (if (or (= 0 (% nn 5)) (= 0 (% nn 3)))
-                      (+ ss nn)
-                      ss)))))
+      (p1 (+ nn 1) (+ ss (u.zero-if-not-divisible nn 3 5))))))
+
+(print (p1))
+
+; The version below uses a mutable variable (`s`) and runs slightly faster than
+; the above, but I like TCO and recursion so the one above is my favourite.
+; (fn p1 []
+;   (var s 0)
+;   (for [i 1 999] (set s (+ s (u.zero-if-not-divisible i 3 5))))
+;   s)
 
 
-(p1)
-(p1p)
+;; PROBLEM 2
+; By considering the terms in the Fibonacci sequence whose values do not exceed four million, ; find the sum of the even-valued terms.
+; I dislike this solution because it is essentially imperitive
+(fn p2 []
+  (var done? false)
+  (local f (u.fibs))
+  (var s 0)
+  (while (not done?)
+    (var v (f))
+    (set done? (< 4000000 v))
+    (set s (+ s (u.zero-if-not-divisible v 2))))
+  s)
 
-; By considering the terms in the Fibonacci sequence whose values do not exceed four million, find the sum of the even-valued terms.
-(lambda fibgen [?a ?b]
-  (let [aa (or ?a 0)
-        bb (or ?b 1)]
-    (coroutine.yield (+ aa bb))
-    (fibgen bb (+ aa bb))))
-
-(fn fibs []
-  (coroutine.wrap fibgen))
-
-(var done? false)
- (var f (fibs))
- (while (not done?)
-   (var v (f))
-   (print v)
-   (set done? (< 4000000 v)))
+(print (p2))
