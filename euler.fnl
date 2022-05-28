@@ -26,11 +26,15 @@
 (lambda fibgen [?a ?b]
   (let [aa (or ?a 0)
         bb (or ?b 1)]
-    (fibgen bb (+ aa bb))
-    (coroutine.yield (+ aa bb))))
+    (coroutine.yield (+ aa bb))
+    (fibgen bb (+ aa bb))))
 
 (fn fibs []
   (coroutine.wrap fibgen))
 
-(each [_ value (pairs (fibs)) :until (< value 4000000)]
-  (print value))
+(var done? false)
+ (var f (fibs))
+ (while (not done?)
+   (var v (f))
+   (print v)
+   (set done? (< 4000000 v)))
