@@ -22,15 +22,25 @@
 
 ;; PROBLEM 2
 ; By considering the terms in the Fibonacci sequence whose values do not exceed four million, ; find the sum of the even-valued terms.
-; I dislike this solution because it is essentially imperitive
 (fn p2 []
-  (var done? false)
-  (local f (u.fibs))
-  (var s 0)
-  (while (not done?)
-    (var v (f))
-    (set done? (< 4000000 v))
-    (set s (+ s (u.zero-if-not-divisible v 2))))
-  s)
+  (local f (u.fibgen))  ; init the coroutine
+  (lambda rip [s]
+    (let [v (f)]
+      (if (< 4000000 v)
+        s
+        (rip (+ s (u.zero-if-not-divisible v 2))))))
+  (rip 0))
 
 (print (p2))
+
+; I dislike this solution because it is essentially imperitive
+; (fn p2 []
+;   (var done? false)
+;   (local f (u.fibgen))  ; init the coroutine
+;   (var s 0)
+;   (while (not done?)
+;     (var v (f))  ; get a new fib
+;     (set done? (< 4000000 v))
+;     (set s (+ s (u.zero-if-not-divisible v 2))))
+;   s)
+
