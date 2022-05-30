@@ -47,6 +47,12 @@
 
 (fn filter-iter! [itr f]
   "filter out values where (not (f v)) for v in iter"
+  ; I think that "stacking" calls to filter-iter! is leading
+  ; to the stack overflow that we are getting. POC of overflow:
+  ;   (var ii (natural-numbers 2))
+  ;   (for [i 1 200]
+  ;     (set ii (filter-iter! ii #(not (divisible? $ i)))))
+  ;   (ii)
   (fn g []
     (let [v (itr)]
       (match (f v)
@@ -80,12 +86,6 @@
     (let [x (itr)]
       (coroutine.yield x)
       (sieve (filter-iter! itr #(not (divisible? $ x))))))
-      ; I think that "stacking" calls to filter-iter! is leading
-      ; to the StackOverflow that we are getting. POC of overflow:
-      ;   (var ii (natural-numbers 2))
-      ;   (for [i 1 200]
-      ;     (set ii (filter-iter! ii #(not (divisible? $ i)))))
-      ;   (ii)
   (coroutine.wrap (partial sieve (natural-numbers 2))))
 
 ;; Debuggers
