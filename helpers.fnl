@@ -46,19 +46,28 @@
 ;; Iterator
 
 (fn filter-iter! [itr f]
-  "filter out values where (not (f v)) for v in iter"
-  ; I think that "stacking" calls to filter-iter! is leading
-  ; to the stack overflow that we are getting. POC of overflow:
+  "filter out values where (not (f v)) for v in iter - do not use in excessively large chains"
+  ; Stacking calls to filter-iter! is leading to stack overflow. POC:
   ;   (var ii (natural-numbers 2))
   ;   (for [i 1 200]
   ;     (set ii (filter-iter! ii #(not (divisible? $ i)))))
   ;   (ii)
+  ; Use filter-iter-chain! instead
   (fn g []
     (let [v (itr)]
       (match (f v)
         x (if x (coroutine.yield v))))
     (g))
   (coroutine.wrap g))
+
+(fn filter-iter-chain! [itr fs]
+  "filter out values where (not (all (f v))) for f in fs for v in itr - does not return an iterator"
+  (fn g []
+    (let [v (itr)]
+      (if (all fs #($ v))
+        v
+        (g))))
+  (g))
 
 (fn take-iter! [n itr]
   (local res [])
@@ -82,11 +91,14 @@
   (coroutine.wrap fibs))
 
 (fn prime-gen []
-  (fn sieve [itr]
-    (let [x (itr)]
+  (local itr (natural-numbers 2))
+  (local filters [])
+  (fn sieve []
+    (let [x (filter-iter-chain! itr filters)]
       (coroutine.yield x)
-      (sieve (filter-iter! itr #(not (divisible? $ x))))))
-  (coroutine.wrap (partial sieve (natural-numbers 2))))
+      (table.insert filters #(not (divisible? $ x)))
+      (sieve)))
+  (coroutine.wrap sieve))
 
 ;; Debuggers
 (lambda print-time [f ...]
