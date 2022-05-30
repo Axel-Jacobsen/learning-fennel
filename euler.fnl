@@ -14,7 +14,7 @@
       ss
       (p1 (+ nn 1) (+ ss (h.zero-if-not-divisible nn 3 5))))))
 
-(print (p1))
+(h.print-time p1)
 
 ; The version below uses a mutable variable (`s`) and runs slightly faster than
 ; the above, but I like TCO and recursion so the one above is my favourite.
@@ -35,7 +35,7 @@
         (rip (+ s (h.zero-if-not-divisible v 2))))))
   (rip 0))
 
-(print (p2))
+(h.print-time p2)
 
 ; I dislike this solution because it is essentially imperitive
 ; (fn p2 []
@@ -50,19 +50,18 @@
 
 ;; PROBLEM 3
 ; What is the largest prime factor of the number 600851475143?
-
 (fn p3 []
   (local P 600851475143)
-  (local sqrt_P (math.sqrt P))
-  (local pg (h.prime-gen))
-  (var max 0)
-  (fn rip []
-    (let [p (pg)]
-      (if (h.divisible? P p)
-        (set max p))
-      (if (not (< p sqrt_P))
-        max
-        (rip))))
-  (rip))
+  (local largetst-possible-prime-factor
+    (let [v (math.ceil (math.sqrt P))]
+         (if (h.odd? v)
+           v
+           (+ v 1))))
+  (fn rip [n]
+    ; thank you short ciruiting
+    (if (and (h.divisible? P n) (h.prime? n))
+      n
+      (rip (- n 2))))
+  (rip largetst-possible-prime-factor))
 
-(print (p3))
+(h.print-time p3)

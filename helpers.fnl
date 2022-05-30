@@ -100,18 +100,30 @@
       (sieve)))
   (coroutine.wrap sieve))
 
+(fn prime? [n]
+  (local pg (prime-gen))
+  (fn inner []
+    (let [p (pg)]
+      (if
+        (< n 0) true
+        (= n p) true
+        (divisible? n p) false
+        (inner))))
+  (inner n))
+
 ;; Debuggers
 (lambda print-time [f ...]
   "print runtime of f"
-  (print f " runtime: " (let [t0 (os.clock)
-                              _ (f ...)
+  (print f "value and runtime:" (let [t0 (os.clock)
+                              v (f ...)
                               t1 (os.clock)]
-                          (- t1 t0))))
+                          (values v (- t1 t0)))))
 
 
 {: divisible?
  : even?
  : odd?
+ : prime?
  : any
  : all
  : zero-if-not-divisible
