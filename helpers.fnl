@@ -6,10 +6,11 @@
 (fn divisible? [v i] "true if v is divisible by i" (= 0 (% v i)))
 (fn even? [v] "true if v is even" (divisible? v 2))
 (fn odd? [v] "true if v is even" (not (even? v)))
+(fn empty? [seq] "true if seq is empty" (= (# seq) 0))
 
 (fn any [seq func]
   "true if (func x) is true for any x in seq"
-  (if (= (# seq) 0)
+  (if (empty? seq)
     false
     (let [[x & xs] seq]
       (if (func x)
@@ -26,13 +27,22 @@
   "v if v is divisible by any of the subsequent args, else 0"
   (if (any [...] #(divisible? v $)) v 0))
 
-
 ;; filter, reduce
 
 (fn sum [seq]
   (accumulate [s 0
                _ n (ipairs seq)]
     (+ s n)))
+
+(fn max [seq]
+  (accumulate [s (. seq 1)
+               _ n (ipairs seq)]
+    (math.max s n)))
+
+(fn min [seq]
+  (accumulate [s (. seq 1)
+               _ n (ipairs seq)]
+    (math.min s n)))
 
 (fn filter [seq f]
   "filter out values where (not (f v)) for v in seq"
@@ -111,19 +121,36 @@
         (inner))))
   (inner n))
 
+(fn prime-factors [P]
+  (local factors [])
+  (fn rip [n d]
+    (if
+      (= 1 n) factors
+      (divisible? n d) (do
+                           (table.insert factors d)
+                           (rip (/ n d) d))
+      (rip n (+ 1 d))))
+  (rip P 2 2))
+
+(max (prime-factors 600851475143))
+
+
 ;; Debuggers
 (lambda print-time [f ...]
   "print runtime of f"
   (print f "value and runtime:" (let [t0 (os.clock)
-                              v (f ...)
-                              t1 (os.clock)]
-                          (values v (- t1 t0)))))
+                                      v (f ...)
+                                      t1 (os.clock)]
+                                  (values v (- t1 t0)))))
 
 
 {: divisible?
  : even?
  : odd?
  : prime?
+ : empty?
+ : max
+ : min
  : any
  : all
  : zero-if-not-divisible
@@ -134,4 +161,5 @@
  : natural-numbers
  : fib-gen
  : prime-gen
+ : prime-factors
  : print-time}

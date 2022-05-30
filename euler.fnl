@@ -50,13 +50,6 @@
 
 ;; PROBLEM 3
 ; What is the largest prime factor of the number 600851475143?
-(fn p3 []
-  (local P 600851475143)
-  (fn rip [n d max]
-    (if
-      (= 1 n) max
-      (h.divisible? n d) (rip (/ n d) d d)
-      (rip n (+ 1 d) max)))
-  (rip P 2 2))
+(fn p3 [] (h.max (h.prime-factors 600851475143)))
 
 (h.print-time p3)
