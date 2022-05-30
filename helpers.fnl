@@ -7,6 +7,8 @@
 (fn even? [v] "true if v is even" (divisible? v 2))
 (fn odd? [v] "true if v is even" (not (even? v)))
 (fn empty? [seq] "true if seq is empty" (= (# seq) 0))
+(fn head [seq] "first el of seq" (. seq 1))
+(fn tail [seq] "rest of seq" (table.unpack seq 2))
 
 (fn any [seq func]
   "true if (func x) is true for any x in seq"
@@ -130,6 +132,20 @@
       (rip n (+ 1 d))))
   (rip P 2))
 
+(fn arrangements [seq]
+  (fn ps [sq]
+    (if
+      (empty? sq) (coroutine.yield [])
+      (each [i e (ipairs sq)]
+        (table.remove sq i)
+        (local inner_pset (arrangements sq))
+        (each [ee inner_pset]
+          (do
+            (table.insert ee 1 e)
+            (coroutine.yield ee)))
+        (table.insert sq i e))))
+  (coroutine.wrap (partial ps seq)))
+
 ;; Debuggers
 (lambda print-time [f ...]
   "print runtime of f"
@@ -139,6 +155,12 @@
                                   (values v dt))))
 
 
+;; String manipulation
+(fn str-idx [s i]
+  (string.sub s i i))
+
+
+;; Exports
 {: divisible?
  : even?
  : odd?
@@ -155,6 +177,7 @@
  : take-iter!
  : natural-numbers
  : fib-gen
+ : str-idx
  : prime-gen
  : prime-factors
  : print-time}

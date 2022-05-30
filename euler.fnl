@@ -34,3 +34,32 @@
 (fn p3 [] (h.max (h.prime-factors 600851475143)))
 
 (h.print-time p3)
+
+
+;; PROBLEM 4
+; What is the largest palindrome that is a product of two three-digit numbers
+(fn check-palindrome [str]
+  (if
+    (h.empty? str) true
+    (= (h.str-idx str 1) (h.str-idx str -1)) (check-palindrome (string.sub str 2 -2))
+    false))
+
+(fn p4 []
+  ; gross brute force, but fennel is fast enough
+  ; ideally we iterate through pairs of three
+  ; digit numbers in order of decreasing product,
+  ; but I am not sure how to do this.
+  (local brute-force-results [])
+  (fn rip [n1 n2]
+    (if (and (< 0 n1) (< 0 n2))
+      (let [sn (tostring (* n1 n2))]
+        (if (check-palindrome sn)
+            (table.insert brute-force-results (* n1 n2)))
+        (if (= n1 100)
+          (rip 999 (- n2 1))
+          (rip (- n1 1) n2)))))
+  (do
+    (rip 999 999)
+    (h.max brute-force-results)))
+
+(h.print-time p4)
