@@ -1,7 +1,5 @@
-(local {: map} (require :fennel.utils))
-(local fv (require :fennel.view))
-
 (local h (require :helpers))
+(local fv (require :fennel.view))
 
 
 ;; PROBLEM 1
@@ -15,13 +13,6 @@
       (p1 (+ nn 1) (+ ss (h.zero-if-not-divisible nn 3 5))))))
 
 (h.print-time p1)
-
-; The version below uses a mutable variable (`s`) and runs slightly faster than
-; the above, but I like TCO and recursion so the one above is my favourite.
-; (fn p1 []
-;   (var s 0)
-;   (for [i 1 999] (set s (+ s (zero-if-not-divisible i 3 5))))
-;   s)
 
 
 ;; PROBLEM 2
@@ -37,16 +28,6 @@
 
 (h.print-time p2)
 
-; I dislike this solution because it is essentially imperitive
-; (fn p2 []
-;   (var done? false)
-;   (local f (fib-gen))  ; init the coroutine
-;   (var s 0)
-;   (while (not done?)
-;     (var v (f))  ; get a new fib
-;     (set done? (< 4000000 v))
-;     (set s (+ s (zero-if-not-divisible v 2))))
-;   s)
 
 ;; PROBLEM 3
 ; What is the largest prime factor of the number 600851475143?

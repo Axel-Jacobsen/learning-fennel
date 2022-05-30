@@ -27,8 +27,6 @@
   "v if v is divisible by any of the subsequent args, else 0"
   (if (any [...] #(divisible? v $)) v 0))
 
-;; filter, reduce
-
 (fn sum [seq]
   (accumulate [s 0
                _ n (ipairs seq)]
@@ -127,21 +125,18 @@
     (if
       (= 1 n) factors
       (divisible? n d) (do
-                           (table.insert factors d)
-                           (rip (/ n d) d))
+                         (table.insert factors d)
+                         (rip (/ n d) d))
       (rip n (+ 1 d))))
-  (rip P 2 2))
-
-(max (prime-factors 600851475143))
-
+  (rip P 2))
 
 ;; Debuggers
 (lambda print-time [f ...]
   "print runtime of f"
   (print f "value and runtime:" (let [t0 (os.clock)
                                       v (f ...)
-                                      t1 (os.clock)]
-                                  (values v (- t1 t0)))))
+                                      dt (- (os.clock) t0)]
+                                  (values v dt))))
 
 
 {: divisible?
