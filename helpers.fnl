@@ -9,6 +9,18 @@
 (fn empty? [seq] "true if seq is empty" (= (# seq) 0))
 (fn head [seq] "first el of seq" (. seq 1))
 (fn tail [seq] "rest of seq" (table.unpack seq 2))
+(fn bool->int [bool] "false -> 0, true -> 1" (if bool 1 0))
+
+(fn gcd [a b]
+  "greatest common divisor"
+  (if
+    (< a b) (gcd b a)
+    (divisible? a b) b
+    (gcd b (% a b))))
+
+(fn lcm [a b]
+  "lowest common multiple"
+  (* a (/ b (gcd a b))))
 
 (fn any [seq func]
   "true if (func x) is true for any x in seq"
@@ -52,6 +64,11 @@
       x (if x (table.insert res v))))
   res)
 
+(fn count [seq v]
+  "return number of instances of v in seq"
+  (accumulate [s 0
+               _ e (ipairs seq)]
+    (+ s (bool->int (= v e)))))
 
 ;; Iterator
 
@@ -79,17 +96,44 @@
         (g))))
   (g))
 
-(fn take-iter! [n itr]
+(fn take-iter! [itr n]
   (local res [])
   (for [_ 1 n]
     (table.insert res (itr)))
   res)
 
-(lambda natural-numbers [?start]
-  (lambda ns [n]
+(fn ith! [itr n]
+  (assert (< 0 n))
+  (fn rip [i]
+    (let [v (itr)]
+      (if (= i n)
+        v
+        (rip (+ i 1)))))
+  (rip 1))
+
+(fn arrangements [seq]
+  (fn ps [sq]
+    (if
+      (empty? sq) (coroutine.yield [])
+      (each [i e (ipairs sq)]
+        (table.remove sq i)
+        (local inner_pset (arrangements sq))
+        (each [ee inner_pset]
+          (do
+            (table.insert ee 1 e)
+            (coroutine.yield ee)))
+        (table.insert sq i e))))
+  (coroutine.wrap (partial ps seq)))
+
+;; Number things
+(fn natural-numbers [?start ?end ?step]
+  "natural numbers from 0 or start to infinity or end (inclusive)"
+  (fn ns [n end step]
     (coroutine.yield n)
-    (ns (+ n 1)))
-  (coroutine.wrap (partial ns (or ?start 0))))
+    (if
+      (or (= end nil) (< n end)) (ns (+ n step) end step) ; end is nil or n < end
+      (coroutine.yield nil))) ; n > end, stop iteration
+  (coroutine.wrap (partial ns (or ?start 0) ?end (or ?step 1))))
 
 (fn fib-gen []
   "fibonacci number generator"
@@ -101,14 +145,16 @@
   (coroutine.wrap fibs))
 
 (fn prime-gen []
-  (local itr (natural-numbers 2))
+  (local itr (natural-numbers 3 nil 2))
   (local filters [])
   (fn sieve []
     (let [x (filter-iter-chain! itr filters)]
       (coroutine.yield x)
       (table.insert filters #(not (divisible? $ x)))
       (sieve)))
-  (coroutine.wrap sieve))
+  (coroutine.wrap (lambda [] (do
+                               (coroutine.yield 2)
+                               (sieve)))))
 
 (fn prime? [n]
   (local pg (prime-gen))
@@ -132,19 +178,6 @@
       (rip n (+ 1 d))))
   (rip P 2))
 
-(fn arrangements [seq]
-  (fn ps [sq]
-    (if
-      (empty? sq) (coroutine.yield [])
-      (each [i e (ipairs sq)]
-        (table.remove sq i)
-        (local inner_pset (arrangements sq))
-        (each [ee inner_pset]
-          (do
-            (table.insert ee 1 e)
-            (coroutine.yield ee)))
-        (table.insert sq i e))))
-  (coroutine.wrap (partial ps seq)))
 
 ;; Debuggers
 (lambda print-time [f ...]
@@ -154,11 +187,15 @@
                                       dt (- (os.clock) t0)]
                                   (values v dt))))
 
-
 ;; String manipulation
 (fn str-idx [s i]
   (string.sub s i i))
 
+(fn palindrome? [str]
+  (if
+    (empty? str) true
+    (= (str-idx str 1) (str-idx str -1)) (palindrome? (string.sub str 2 -2))
+    false))
 
 ;; Exports
 {: divisible?
@@ -166,6 +203,15 @@
  : odd?
  : prime?
  : empty?
+ : palindrome?
+ : filter-iter!
+ : take-iter!
+ : ith!
+ : head
+ : tail
+ : gcd
+ : lcm
+ : count
  : max
  : min
  : any
@@ -173,8 +219,6 @@
  : zero-if-not-divisible
  : sum
  : filter
- : filter-iter!
- : take-iter!
  : natural-numbers
  : fib-gen
  : str-idx

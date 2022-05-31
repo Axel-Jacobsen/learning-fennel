@@ -38,12 +38,6 @@
 
 ;; PROBLEM 4
 ; What is the largest palindrome that is a product of two three-digit numbers
-(fn check-palindrome [str]
-  (if
-    (h.empty? str) true
-    (= (h.str-idx str 1) (h.str-idx str -1)) (check-palindrome (string.sub str 2 -2))
-    false))
-
 (fn p4 []
   ; gross brute force, but fennel is fast enough
   ; ideally we iterate through pairs of three
@@ -53,8 +47,8 @@
   (fn rip [n1 n2]
     (if (and (< 0 n1) (< 0 n2))
       (let [sn (tostring (* n1 n2))]
-        (if (check-palindrome sn)
-            (table.insert brute-force-results (* n1 n2)))
+        (if (h.palindrome? sn)
+          (table.insert brute-force-results (* n1 n2)))
         (if (= n1 100)
           (rip 999 (- n2 1))
           (rip (- n1 1) n2)))))
@@ -63,3 +57,45 @@
     (h.max brute-force-results)))
 
 (h.print-time p4)
+
+
+;; PROBLEM 5
+; What is the smallest positive number that is evenly
+; divisible by all of the numbers from 1 to 20?
+; (i.e. LCM 1..20)
+(fn p5 []
+  (local nats (h.natural-numbers 1 20))
+  (accumulate [lcm 1
+               v nats]
+    (h.lcm lcm v)))
+
+(h.print-time p5)
+
+
+;; PROBLEM 6
+; Find the difference between the sum of the squares of the first
+; one hundred natural numbers and the square of the sum.
+(fn p6 []
+  ; consuming iterators, so we need 2!
+  (local nats1 (h.natural-numbers 1 100))
+  (local nats2 (h.natural-numbers 1 100))
+  (- (^ (accumulate [s 0
+                     v nats2]
+          (+ s v)) 2)
+     (accumulate [ss 0
+                  v nats1]
+       (+ ss (^ v 2)))
+     ))
+
+(h.print-time p6)
+
+
+;; PROBLEM 7
+; What is the 10001st prime number?
+; Current runtime is 755 seconds ~= 12 min 30 sec
+; need to come back and make my sieve better!!
+(fn p7 []
+  (let [ps (h.prime-gen)]
+    (h.ith! ps 10001)))
+
+(h.print-time p7)
