@@ -46,6 +46,11 @@
                _ n (ipairs seq)]
     (+ s n)))
 
+(fn prod [seq]
+  (accumulate [s 1
+               _ n (ipairs seq)]
+    (* s n)))
+
 (fn max [seq]
   (accumulate [s (. seq 1)
                _ n (ipairs seq)]
@@ -71,6 +76,14 @@
     (+ s (bool->int (= v e)))))
 
 ;; Iterator
+
+(fn iter-collect! [itr ?f]
+  "writing this manually because I cannot for the life of me understand why icollect isn't working"
+  (local f (or ?f #$))
+  (local vs [])
+  (each [e itr]
+    (table.insert vs (f e)))
+  vs)
 
 (fn filter-iter! [itr f]
   "filter out values where (not (f v)) for v in iter - do not use in excessively large chains"
@@ -126,7 +139,7 @@
   (coroutine.wrap (partial ps seq)))
 
 ;; Number things
-(fn natural-numbers [?start ?end ?step]
+(fn natural-numbers-coroutine [?start ?end ?step]
   "natural numbers from 0 or start to infinity or end (inclusive)"
   (fn ns [n end step]
     (coroutine.yield n)
@@ -135,14 +148,29 @@
       (coroutine.yield nil))) ; n > end, stop iteration
   (coroutine.wrap (partial ns (or ?start 0) ?end (or ?step 1))))
 
+(fn natural-numbers [?start ?end ?step]
+  "natural numbers from 0 or start to infinity or end (inclusive)"
+  (local step (or ?step 1))
+  (local end ?end)
+  (var n (- (or ?start 0) step))  ; pre-emptively subtract step
+  (fn ns []
+   (if
+      (or (= end nil) (< n end)) (do
+                                   (set n (+ n step))
+                                   n) ; end is nil or n < end
+      nil)) ; n > end, stop iteration
+  ns)
+
 (fn fib-gen []
-  "fibonacci number generator"
-  (lambda fibs [?a ?b]
-    (let [aa (or ?a 0)
-          bb (or ?b 1)]
-      (coroutine.yield (+ aa bb))
-      (fibs bb (+ aa bb))))
-  (coroutine.wrap fibs))
+  (var a 0)
+  (var b 1)
+  (fn fibs []
+    (do
+      (local tmp a)
+      (set a b)
+      (set b (+ tmp b))
+      (+ a b)))
+  fibs)
 
 (fn prime-gen []
   (local itr (natural-numbers 3 nil 2))
@@ -191,6 +219,11 @@
 (fn str-idx [s i]
   (string.sub s i i))
 
+(fn split [s]
+  (let [t []]
+    (string.gsub s "." #(table.insert t $))
+    t))
+
 (fn palindrome? [str]
   (if
     (empty? str) true
@@ -206,6 +239,7 @@
  : palindrome?
  : filter-iter!
  : take-iter!
+ : iter-collect!
  : ith!
  : head
  : tail
@@ -218,10 +252,12 @@
  : all
  : zero-if-not-divisible
  : sum
+ : prod
  : filter
  : natural-numbers
  : fib-gen
  : str-idx
+ : split
  : prime-gen
  : prime-factors
  : print-time}

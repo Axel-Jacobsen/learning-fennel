@@ -1,5 +1,6 @@
 (local h (require :helpers))
 (local fv (require :fennel.view))
+(local {: map} (require :fennel.utils))
 
 
 ;; PROBLEM 1
@@ -94,8 +95,27 @@
 ; What is the 10001st prime number?
 ; Current runtime is 755 seconds ~= 12 min 30 sec
 ; need to come back and make my sieve better!!
-(fn p7 []
-  (let [ps (h.prime-gen)]
-    (h.ith! ps 10001)))
+; (fn p7 []
+;   (let [ps (h.prime-gen)]
+;     (h.ith! ps 10001)))
 
-(h.print-time p7)
+; (h.print-time p7)
+
+
+;; PROBLEM 8
+; find the largest product of 7 consecutive digits in this big ol num
+(fn p8 []
+  (let [data (with-open [fin (io.open :data_inputs/p8.txt)]
+               (string.gsub (fin:read :*a) "\n" ""))
+        window-len 13
+        nats (h.iter-collect! (h.natural-numbers 1 (- (# data) window-len)))]
+    (h.max
+      (map
+        nats
+        (fn [i]
+          (h.prod (map
+                    (h.split (string.sub data i (+ i (- window-len 1))))
+                    tonumber)))))
+    ))
+
+(p8)
