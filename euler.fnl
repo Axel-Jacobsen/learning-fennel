@@ -96,11 +96,10 @@
 ; Current runtime is 755 seconds ~= 12 min 30 sec
 ; need to come back and make my sieve better!!
 (fn p7 []
-  (let [ps (h.prime-gen-2)]
+  (let [ps (h.prime-gen 1000000)]
     (h.ith! ps 10001)))
 
 (h.print-time p7)
-
 
 ;; PROBLEM 8
 ; find the largest product of 7 consecutive digits in this big ol num
@@ -140,3 +139,13 @@
   (rip 998 1))
 
 (h.print-time p9)
+
+
+;; PROBLEM 10
+; Find the sum primes below 2 million
+(fn p10 []
+  (accumulate [s 0
+               p (h.prime-gen 2000000)]
+    (+ s p)))
+
+(h.print-time p10)

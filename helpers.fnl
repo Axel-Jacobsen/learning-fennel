@@ -14,6 +14,7 @@
 (fn head [seq] "first el of seq" (. seq 1))
 (fn tail [seq] "rest of seq" (table.unpack seq 2))
 (fn bool->int [bool] "false -> 0, true -> 1" (if bool 1 0))
+(fn int->bool [int]  "0 -> false, else true" (if (= 0 int) false true))
 
 (fn gcd [a b]
   "greatest common divisor"
@@ -79,6 +80,20 @@
                _ e (ipairs seq)]
     (+ s (bool->int (= v e)))))
 
+(fn ones [size]
+  (assert (< 0 size))
+  (local v [])
+  (for [i 0 size]
+    (table.insert v 1))
+  v)
+
+(fn zeros [size]
+  (assert (< 0 size))
+  (local v [])
+  (for [i 0 size]
+    (table.insert v 0))
+  v)
+
 ;; Iterator
 
 (fn iter-collect! [itr ?f]
@@ -106,6 +121,7 @@
 
 (fn filter-iter-chain! [itr fs]
   "filter out values where (not (all (f v))) for f in fs for v in itr - does not return an iterator"
+  "probably slow"
   (fn g []
     (let [v (itr)]
       (if (all fs #($ v))
@@ -120,7 +136,6 @@
   res)
 
 (fn ith! [itr n]
-  (assert (< 0 n))
   (fn rip [i]
     (let [v (itr)]
       (if (= i n)
@@ -158,7 +173,7 @@
   (local end ?end)
   (var n (- (or ?start 0) step))  ; pre-emptively subtract step
   (fn ns []
-   (if
+    (if
       (or (= end nil) (< n end)) (do
                                    (set n (+ n step))
                                    n) ; end is nil or n < end
@@ -176,29 +191,6 @@
       (+ a b)))
   fibs)
 
-(fn prime-gen []
-  (local itr (natural-numbers 3 nil 2))
-  (local filters [])
-  (fn sieve []
-    (let [x (filter-iter-chain! itr filters)]
-      (coroutine.yield x)
-      (table.insert filters #(not (divisible? $ x)))
-      (sieve)))
-  (coroutine.wrap (lambda [] (do
-                               (coroutine.yield 2)
-                               (sieve)))))
-
-(fn prime? [n]
-  (local pg (prime-gen))
-  (fn inner []
-    (let [p (pg)]
-      (if
-        (< n 0) true
-        (= n p) true
-        (divisible? n p) false
-        (inner))))
-  (inner n))
-
 (fn prime-factors [P]
   (local factors [])
   (fn rip [n d]
@@ -210,16 +202,34 @@
       (rip n (+ 1 d))))
   (rip P 2))
 
-(fn prime-gen-2 []
+(fn prime? [n] (= 1 (# (prime-factors n))))
+
+(fn prime-gen-infinite []
+  "infinite and relatively slow"
   (local nats (natural-numbers 3 nil 2))
   (fn rip []
     (local n (nats))
-    (if (= 1 (# (prime-factors n)))
+    (if (prime?  n)
       n
       (rip)))
   rip)
 
-;; Debuggers
+(fn prime-gen [?primes-under]
+  "not infinite but ~~speedy~~"
+  (local sh (or ?primes-under 15000))
+  (local primes (ones sh))
+  (var i 2)
+  (fn rip []
+    (if
+      (< sh i) nil
+      (bool->int (. primes i)) (do
+                                 (local tmp i)
+                                 (for [j i (# primes) i] (tset primes j 0))
+                                 (while (= 0 (. primes i)) (set i (+ i 1)))
+                                 tmp)))
+  rip)
+
+;, Debuggers
 (lambda print-time [f ...]
   "print runtime of f"
   (print f "value and runtime:" (let [t0 (os.clock)
@@ -271,6 +281,6 @@
  : str-idx
  : split
  : prime-gen
- : prime-gen-2
+ : prime-gen-infinite
  : prime-factors
  : print-time}
