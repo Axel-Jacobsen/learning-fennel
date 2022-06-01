@@ -7,6 +7,7 @@
 (local fv (require :fennel.view))
 (local u (require :fennel.utils))
 
+;; Basics
 (fn divisible? [v i] "true if v is divisible by i" (= 0 (% v i)))
 (fn even? [v] "true if v is even" (divisible? v 2))
 (fn odd? [v] "true if v is even" (not (even? v)))
@@ -94,8 +95,47 @@
     (table.insert v 0))
   v)
 
-;; Iterator
 
+;; String manipulation
+(fn array-str-concat [arr-of-str]
+  (accumulate [str ""
+               _ s (ipairs arr-of-str)]
+    (.. str s)))
+
+
+(fn str-idx [s i]
+  (string.sub s i i))
+
+(fn split [s]
+  (let [t []]
+    (string.gsub s "." #(table.insert t $))
+    t))
+
+(fn palindrome? [str]
+  (if
+    (empty? str) true
+    (= (str-idx str 1) (str-idx str -1)) (palindrome? (string.sub str 2 -2))
+    false))
+
+(fn hash-args [...]
+  (array-str-concat (u.map [...] tostring)))
+
+
+;; Dynamic programming stuff
+(fn cache [f]
+  (local tbl {})
+
+  (fn c [...]
+    (let [arghash (hash-args ...)]
+      (if (?. tbl arghash) ; are args in tbl?
+        (. tbl [...])
+        (do
+          (tset tbl arghash (f ...))
+          (. tbl arghash)))))
+  c)
+
+
+;; Iterator
 (fn iter-collect! [itr ?f]
   "writing this manually because I cannot for the life of me understand why icollect isn't working"
   (local f (or ?f #$))
@@ -229,7 +269,8 @@
                                  tmp)))
   rip)
 
-;, Debuggers
+
+;; Debuggers
 (lambda print-time [f ...]
   "print runtime of f"
   (print f "value and runtime:" (let [t0 (os.clock)
@@ -237,20 +278,6 @@
                                       dt (- (os.clock) t0)]
                                   (values v dt))))
 
-;; String manipulation
-(fn str-idx [s i]
-  (string.sub s i i))
-
-(fn split [s]
-  (let [t []]
-    (string.gsub s "." #(table.insert t $))
-    t))
-
-(fn palindrome? [str]
-  (if
-    (empty? str) true
-    (= (str-idx str 1) (str-idx str -1)) (palindrome? (string.sub str 2 -2))
-    false))
 
 ;; Exports
 {: divisible?
@@ -259,6 +286,7 @@
  : prime?
  : empty?
  : palindrome?
+ : cache
  : filter-iter!
  : take-iter!
  : iter-collect!
