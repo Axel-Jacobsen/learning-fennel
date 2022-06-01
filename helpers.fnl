@@ -1,5 +1,9 @@
 ;; Helper file for my Fennel
 ;; Implementing it all from scratch for fun!
+
+; What are the meaningful differences between
+; a coroutine vs closure? Is one faster?
+
 (local fv (require :fennel.view))
 (local u (require :fennel.utils))
 
@@ -206,6 +210,14 @@
       (rip n (+ 1 d))))
   (rip P 2))
 
+(fn prime-gen-2 []
+  (local nats (natural-numbers 3 nil 2))
+  (fn rip []
+    (local n (nats))
+    (if (= 1 (# (prime-factors n)))
+      n
+      (rip)))
+  rip)
 
 ;; Debuggers
 (lambda print-time [f ...]
@@ -259,5 +271,6 @@
  : str-idx
  : split
  : prime-gen
+ : prime-gen-2
  : prime-factors
  : print-time}

@@ -95,11 +95,11 @@
 ; What is the 10001st prime number?
 ; Current runtime is 755 seconds ~= 12 min 30 sec
 ; need to come back and make my sieve better!!
-; (fn p7 []
-;   (let [ps (h.prime-gen)]
-;     (h.ith! ps 10001)))
+(fn p7 []
+  (let [ps (h.prime-gen-2)]
+    (h.ith! ps 10001)))
 
-; (h.print-time p7)
+(h.print-time p7)
 
 
 ;; PROBLEM 8
@@ -118,4 +118,25 @@
                     tonumber)))))
     ))
 
-(p8)
+(h.print-time p8)
+
+
+;; PROBLEM 9
+; There exists exactly one Pythagorean triplet for which a + b + c = 1000.
+; Find the product abc.
+(fn p9 []
+  ; we know c > b and a
+  ; Loop from c = 1000 to 1
+  ; b from c to 1
+  ; a =  1000 - b - c
+  ; check for pyth trippy
+  (fn rip [c b]
+    (let [a (- (- 1000 c) b)]
+      (if
+        (= (^ c 2) (+ (^ b 2) (^ a 2))) (h.prod [a b c])
+        (if (= b 1)
+          (rip (- c 1) (- (- 1000 c) 1))
+          (rip c (- b 1))))))
+  (rip 998 1))
+
+(h.print-time p9)
