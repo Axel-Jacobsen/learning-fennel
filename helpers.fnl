@@ -84,14 +84,14 @@
 (fn ones [size]
   (assert (< 0 size))
   (local v [])
-  (for [i 0 size]
+  (for [_ 1 size]
     (table.insert v 1))
   v)
 
 (fn zeros [size]
   (assert (< 0 size))
   (local v [])
-  (for [i 0 size]
+  (for [_ 1 size]
     (table.insert v 0))
   v)
 
@@ -197,6 +197,15 @@
         (table.insert sq i e))))
   (coroutine.wrap (partial ps seq)))
 
+(fn indicies [seq ?f ?arr]
+  "returns indicies of seq where f is true"
+  (local idxs (or ?arr []))
+  (let [f (or ?f int->bool)]
+    (each [i v (ipairs seq)]
+      (if (f v)
+        (table.insert idxs i))))
+  idxs)
+
 ;; Number things
 (fn natural-numbers-coroutine [?start ?end ?step]
   "natural numbers from 0 or start to infinity or end (inclusive)"
@@ -244,7 +253,7 @@
 
 (fn prime? [n] (= 1 (# (prime-factors n))))
 
-(fn prime-gen-infinite []
+(fn prime-gen-brute []
   "infinite and relatively slow"
   (local nats (natural-numbers 3 nil 2))
   (fn rip []
@@ -269,8 +278,55 @@
                                  tmp)))
   rip)
 
+(fn indicies-w-offset [seq ?f ?arr ?offset]
+  "returns indicies of seq where f is true - very bespoke function, kinda weird"
+  (local idxs (or ?arr []))
+  (local offset (or ?offset 0))
+  (let [f (or ?f int->bool)]
+    (each [i v (ipairs seq)]
+      (if (f v)
+        (table.insert idxs (+ offset i)))))
+  idxs)
 
-;; Debuggers
+(fn prime-gen-2 [?size-hint]
+  "infinite and ~~speedy~~"
+  "Fennel / Lua being 1-indexed messes everything up"
+  (var lower-limit 1)
+  (var limit (or ?size-hint 15000))
+  (local primes (ones limit))
+  (local prime-num-list [])
+  (tset primes 1 0)
+
+  (var i 2)
+  (fn rip []
+    (if (= (# primes) i)
+      (do
+        ; Need to keep a list of the old primes
+        ; And need to figure out how to add indicies
+        (indicies-w-offset primes nil prime-num-list (- lower-limit 1))
+        (var tmp (+ (- limit lower-limit) 1))
+        (set lower-limit limit)
+        (set limit (+ lower-limit (* 2 tmp)))  ; can be 2.718 ;)
+        (for [ii 1 (# primes)] (tset primes ii 1))  ; reset old table
+        (for [ii lower-limit limit] (table.insert primes 1))  ; add new primes
+        (each [_ p (ipairs prime-num-list)]
+          (local base (if (= 0 (% lower-limit p)) 0 (- p (% lower-limit p))))  ; new-lower + (p - (new-lower % p))
+          (for [ii base (# primes) p] (tset primes (+ 1 ii) 0)))
+        (set i 1)
+        (while (and (< i (# primes)) (= 0 (. primes i))) (set i (+ i 1)))
+        (var prime-num (- (+ lower-limit i) 1))
+        (set i (+ 1 i))
+        (while (and (< i (# primes)) (= 0 (. primes i))) (set i (+ i 1)))
+        prime-num)
+      (do
+        (local prime-num (- (+ lower-limit i) 1))
+        (for [j (+ i prime-num) (# primes) prime-num] (tset primes j 0))
+        (set i (+ i 1))
+        (while (and (< i (# primes)) (= 0 (. primes i))) (set i (+ i 1)))
+        prime-num)))
+  rip)
+
+;, Debuggers
 (lambda print-time [f ...]
   "print runtime of f"
   (print f "value and runtime:" (let [t0 (os.clock)
@@ -309,6 +365,7 @@
  : str-idx
  : split
  : prime-gen
- : prime-gen-infinite
+ : prime-gen-2
+ : prime-gen-brute
  : prime-factors
  : print-time}
