@@ -264,6 +264,7 @@
   (let [pfs (prime-factors P)
         insts (instances pfs)]
     (prod (icollect [_ v (pairs insts)] (+ 1 v)))))
+
 (fn prime? [n] (= 1 (# (prime-factors n))))
 
 (fn prime-gen-brute []
@@ -305,7 +306,7 @@
   "infinite and ~~speedy~~"
   "Fennel / Lua being 1-indexed messes everything up"
   (var lower-limit 1)
-  (var limit (or ?size-hint 15000))
+  (var limit (or ?size-hint 100000))
   (local primes (ones limit))
   (local prime-num-list [])
   (tset primes 1 0)
@@ -317,9 +318,9 @@
         ; Need to keep a list of the old primes
         ; And need to figure out how to add indicies
         (indicies-w-offset primes nil prime-num-list (- lower-limit 1))
-        (var tmp (+ (- limit lower-limit) 1))
+        (var tmp (+ 1 (- limit lower-limit)))
         (set lower-limit limit)
-        (set limit (+ lower-limit (* 2 tmp)))  ; can be 2.718 ;)
+        (set limit (+ lower-limit (* 2 tmp)))
         (for [ii 1 (# primes)] (tset primes ii 1))  ; reset old table
         (for [ii lower-limit limit] (table.insert primes 1))  ; add new primes
         (each [_ p (ipairs prime-num-list)]
@@ -332,7 +333,7 @@
         (while (and (< i (# primes)) (= 0 (. primes i))) (set i (+ i 1)))
         prime-num)
       (do
-        (local prime-num (- (+ lower-limit i) 1))
+        (local prime-num (+ i (- lower-limit 1)))
         (for [j (+ i prime-num) (# primes) prime-num] (tset primes j 0))
         (set i (+ i 1))
         (while (and (< i (# primes)) (= 0 (. primes i))) (set i (+ i 1)))
