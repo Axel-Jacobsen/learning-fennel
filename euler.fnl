@@ -149,3 +149,16 @@
     (+ s p)))
 
 (h.print-time p10)
+;; PROBLEM 12
+; What is the value of the first triangle number to have over five hundred divisors?
+(fn p12 []
+  (local n (h.natural-numbers 1))
+  (fn rip [s]
+    (let [csum (+ s (n))
+          nd (h.num-divisors csum)]
+      (if (< 500 nd)
+        csum
+        (rip csum))))
+  (rip 0))
+
+(h.print-time p12)

@@ -95,6 +95,15 @@
     (table.insert v 0))
   v)
 
+(fn instances [seq]
+  "return a map from element to number of instances in seq"
+  (local instance-map {})
+  (each [_ e (ipairs seq)]
+    (let [ee (tostring e)]
+      (if (?. instance-map ee)
+        (tset instance-map ee (+ 1 (. instance-map ee)))
+        (tset instance-map ee 1))))
+  instance-map)
 
 ;; String manipulation
 (fn array-str-concat [arr-of-str]
@@ -251,6 +260,10 @@
       (rip n (+ 1 d))))
   (rip P 2))
 
+(fn num-divisors [P]
+  (let [pfs (prime-factors P)
+        insts (instances pfs)]
+    (prod (icollect [_ v (pairs insts)] (+ 1 v)))))
 (fn prime? [n] (= 1 (# (prime-factors n))))
 
 (fn prime-gen-brute []
@@ -352,6 +365,7 @@
  : gcd
  : lcm
  : count
+ : instances
  : max
  : min
  : any
@@ -364,6 +378,7 @@
  : fib-gen
  : str-idx
  : split
+ : num-divisors
  : prime-gen
  : prime-gen-2
  : prime-gen-brute
