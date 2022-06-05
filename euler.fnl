@@ -13,7 +13,7 @@
       ss
       (p1 (+ nn 1) (+ ss (h.zero-if-not-divisible nn 3 5))))))
 
-(h.print-time p1)
+(h.print-time p1 1)
 
 
 ;; PROBLEM 2
@@ -27,14 +27,14 @@
         (rip (+ s (h.zero-if-not-divisible v 2))))))
   (rip 0))
 
-(h.print-time p2)
+(h.print-time p2 2)
 
 
 ;; PROBLEM 3
 ; What is the largest prime factor of the number 600851475143?
 (fn p3 [] (h.max (h.prime-factors 600851475143)))
 
-(h.print-time p3)
+(h.print-time p3 3)
 
 
 ;; PROBLEM 4
@@ -57,7 +57,7 @@
     (rip 999 999)
     (h.max brute-force-results)))
 
-(h.print-time p4)
+(h.print-time p4 4)
 
 
 ;; PROBLEM 5
@@ -70,7 +70,7 @@
                v nats]
     (h.lcm lcm v)))
 
-(h.print-time p5)
+(h.print-time p5 5)
 
 
 ;; PROBLEM 6
@@ -88,7 +88,7 @@
        (+ ss (^ v 2)))
      ))
 
-(h.print-time p6)
+(h.print-time p6 6)
 
 
 ;; PROBLEM 7
@@ -99,7 +99,7 @@
   (let [ps (h.prime-gen 1000000)]
     (h.ith! ps 10001)))
 
-(h.print-time p7)
+(h.print-time p7 7)
 
 ;; PROBLEM 8
 ; find the largest product of 7 consecutive digits in this big ol num
@@ -117,7 +117,7 @@
                     tonumber)))))
     ))
 
-(h.print-time p8)
+(h.print-time p8 8)
 
 
 ;; PROBLEM 9
@@ -138,7 +138,7 @@
           (rip c (- b 1))))))
   (rip 998 1))
 
-(h.print-time p9)
+(h.print-time p9 9)
 
 
 ;; PROBLEM 10
@@ -148,7 +148,20 @@
                p (h.prime-gen 2000000)]
     (+ s p)))
 
-(h.print-time p10)
+
+(fn p10-2 []
+  (local pg (h.prime-gen-2))
+  (fn rip [sum]
+    (let [p (pg)]
+      (if (< 2000000 p)
+        sum
+        (rip (+ p sum)))))
+  (rip 0))
+
+
+(h.print-time p10 10)
+(h.print-time p10-2 :10-2)
+
 ;; PROBLEM 12
 ; What is the value of the first triangle number to have over five hundred divisors?
 (fn p12 []
@@ -161,4 +174,31 @@
         (rip csum))))
   (rip 0))
 
-(h.print-time p12)
+(h.print-time p12 12)
+
+
+(fn p14 []
+
+  (local tbl {})
+
+  (fn collatz [n]
+    (if
+      (?. tbl n) (. tbl n)
+      (let [res (if
+                  (= n 1) 1
+                  (h.even? n) (+ 1 (collatz (/ n 2)))
+                  (+ 1 (collatz (+ (* 3 n) 1))))]
+        (tset tbl n res)
+        res)))
+
+  (var max 0)
+  (var argmax 0)
+  (each [n (h.natural-numbers 1 999999)]
+    (let [cl (collatz n)]
+      (if (< max cl)
+        (do
+          (set max cl)
+          (set argmax n)))))
+  argmax)
+
+(h.print-time p14 14)

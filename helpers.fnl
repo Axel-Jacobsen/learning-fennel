@@ -105,6 +105,9 @@
         (tset instance-map ee 1))))
   instance-map)
 
+(fn keys [tbl]
+  (icollect [k _ (pairs tbl)] k))
+
 ;; String manipulation
 (fn array-str-concat [arr-of-str]
   (accumulate [str ""
@@ -137,7 +140,7 @@
   (fn c [...]
     (let [arghash (hash-args ...)]
       (if (?. tbl arghash) ; are args in tbl?
-        (. tbl [...])
+        (. tbl arghash)
         (do
           (tset tbl arghash (f ...))
           (. tbl arghash)))))
@@ -341,9 +344,9 @@
   rip)
 
 ;, Debuggers
-(lambda print-time [f ...]
+(lambda print-time [f ?msg ...]
   "print runtime of f"
-  (print f "value and runtime:" (let [t0 (os.clock)
+  (print (or ?msg f) "value and runtime:" (let [t0 (os.clock)
                                       v (f ...)
                                       dt (- (os.clock) t0)]
                                   (values v dt))))
@@ -367,6 +370,7 @@
  : lcm
  : count
  : instances
+ : keys
  : max
  : min
  : any
