@@ -148,19 +148,8 @@
                p (h.prime-gen 2000000)]
     (+ s p)))
 
-
-(fn p10-2 []
-  (local pg (h.prime-gen-2))
-  (fn rip [sum]
-    (let [p (pg)]
-      (if (< 2000000 p)
-        sum
-        (rip (+ p sum)))))
-  (rip 0))
-
-
 (h.print-time p10 10)
-(h.print-time p10-2 :10-2)
+
 
 ;; PROBLEM 12
 ; What is the value of the first triangle number to have over five hundred divisors?
@@ -177,6 +166,8 @@
 (h.print-time p12 12)
 
 
+;; PROBLEM 14
+; Find longest collatz sequence starting below 1 million
 (fn p14 []
 
   (local tbl {})
