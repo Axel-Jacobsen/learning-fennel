@@ -193,3 +193,17 @@
   argmax)
 
 (h.print-time p14 14)
+
+
+;; PROBLEM 22
+; Sort the names and go from there
+(fn p22 []
+  (let [data (with-open [fin (io.open :data_inputs/p22_names.txt)]
+               (h.split (fin:read :*a) "(%w+)"))
+        letters (collect [i v (ipairs (h.split "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))] (values v i))]
+    (table.sort data)
+    (accumulate [s 0
+                 i name (ipairs data)]
+      (+ s (* i (h.sum (map (h.split name) #(. letters $))))))))
+
+(h.print-time p22 22)

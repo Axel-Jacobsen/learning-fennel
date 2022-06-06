@@ -118,9 +118,10 @@
 (fn str-idx [s i]
   (string.sub s i i))
 
-(fn split [s]
-  (let [t []]
-    (string.gsub s "." #(table.insert t $))
+(fn split [str ?delimeter]
+  (let [t []
+        d (or ?delimeter ".")]
+    (string.gsub str d #(table.insert t $))
     t))
 
 (fn palindrome? [str]
