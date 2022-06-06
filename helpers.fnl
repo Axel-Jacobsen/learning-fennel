@@ -41,6 +41,9 @@
   "true if (func x) is true for all x in seq"
   (not (any seq #(not (func $)))))
 
+(fn in [seq value]
+  (any seq #(= $ value)))
+
 ; this could be more general
 ; smth like val * kroneker-delta(f(val, seq)) where f returns a bool
 (lambda zero-if-not-divisible [v ...]
@@ -219,6 +222,16 @@
         (table.insert idxs i))))
   idxs)
 
+(fn indicies-w-offset [seq ?f ?arr ?offset]
+  "returns indicies of seq where f is true - very bespoke function, kinda weird"
+  (local idxs (or ?arr []))
+  (local offset (or ?offset 0))
+  (let [f (or ?f int->bool)]
+    (each [i v (ipairs seq)]
+      (if (f v)
+        (table.insert idxs (+ offset i)))))
+  idxs)
+
 ;; Number things
 (fn natural-numbers-coroutine [?start ?end ?step]
   "natural numbers from 0 or start to infinity or end (inclusive)"
@@ -296,16 +309,6 @@
                                  tmp)))
   rip)
 
-(fn indicies-w-offset [seq ?f ?arr ?offset]
-  "returns indicies of seq where f is true - very bespoke function, kinda weird"
-  (local idxs (or ?arr []))
-  (local offset (or ?offset 0))
-  (let [f (or ?f int->bool)]
-    (each [i v (ipairs seq)]
-      (if (f v)
-        (table.insert idxs (+ offset i)))))
-  idxs)
-
 (fn prime-gen-2 [?size-hint]
   "infinite and ~~speedy~~"
   "Fennel / Lua being 1-indexed messes everything up"
@@ -376,6 +379,7 @@
  : min
  : any
  : all
+ : in
  : zero-if-not-divisible
  : sum
  : prod

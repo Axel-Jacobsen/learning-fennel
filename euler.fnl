@@ -207,3 +207,24 @@
       (+ s (* i (h.sum (map (h.split name) #(. letters $))))))))
 
 (h.print-time p22 22)
+
+
+;; PROBLEM 40
+
+(fn p40 []
+  (local interesting-digits [1 10 100 1000 10000 100000 1000000])
+  (local N (h.natural-numbers 1))
+  (var current-digits [])
+  (fn get-next-digit []
+    (if (h.empty? current-digits)
+      (do
+        (set current-digits (h.split (tostring (N))))
+        (get-next-digit))
+      (tonumber (table.remove current-digits 1))))
+
+  (accumulate [s 1
+               i (h.natural-numbers 1 1000000)]
+    (let [e (get-next-digit)]
+      (* s (if (h.in interesting-digits i) e 1)))))
+
+(h.print-time p40 40)
