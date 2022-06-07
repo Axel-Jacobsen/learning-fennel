@@ -209,8 +209,17 @@
 (h.print-time p22 22)
 
 
-;; PROBLEM 40
+;; PROBLEM 25
+; Find the index of the first 1000 digit Fibonacci Number
+(fn p25 []
+  (let [phi (/ (+ 1 (math.sqrt 5)) 2)]
+    (math.ceil (/
+     (+ (/ (math.log (math.sqrt 5)) (math.log 10)) (- 1000 1))
+     (/ (math.log phi) (math.log 10))))))
 
+(p25)
+
+;; PROBLEM 40
 (fn p40 []
   (local interesting-digits [1 10 100 1000 10000 100000 1000000])
   (local N (h.natural-numbers 1))

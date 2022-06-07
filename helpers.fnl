@@ -266,6 +266,11 @@
       (+ a b)))
   fibs)
 
+(fn Fn [n]
+  (local phi (/ (+ 1 (math.sqrt 5)) 2))
+  (local psi (- 1 phi))
+  (/ (- (math.pow phi n) (math.pow psi n)) (math.sqrt 5)))
+
 (fn prime-factors [P]
   (local factors [])
   (fn rip [n d]
@@ -386,6 +391,7 @@
  : filter
  : natural-numbers
  : fib-gen
+ : Fn
  : str-idx
  : split
  : num-divisors
