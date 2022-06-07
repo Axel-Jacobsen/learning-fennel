@@ -17,17 +17,6 @@
 (fn bool->int [bool] "false -> 0, true -> 1" (if bool 1 0))
 (fn int->bool [int]  "0 -> false, else true" (if (= 0 int) false true))
 
-(fn gcd [a b]
-  "greatest common divisor"
-  (if
-    (< a b) (gcd b a)
-    (divisible? a b) b
-    (gcd b (% a b))))
-
-(fn lcm [a b]
-  "lowest common multiple"
-  (* a (/ b (gcd a b))))
-
 (fn any [seq func]
   "true if (func x) is true for any x in seq"
   (if (empty? seq)
@@ -56,9 +45,14 @@
     (+ s n)))
 
 (fn prod [seq]
-  (accumulate [s 1
-               _ n (ipairs seq)]
-    (* s n)))
+  (if (= (type seq) "function") (accumulate [s 1
+                                             n seq]
+                                  (* s n))
+    (= (type seq) "table") (accumulate [s 1
+                                        _ n (ipairs seq)]
+                             (* s n))
+    (do
+      (assert false (.. "invalid seq type for prod - " (type seq))))))
 
 (fn max [seq]
   (accumulate [s (. seq 1)
@@ -110,6 +104,15 @@
 
 (fn keys [tbl]
   (icollect [k _ (pairs tbl)] k))
+
+(fn zip [itr1 itr2]
+  (fn yield []
+    (let [el1 (itr1)
+          el2 (itr2)]
+      (if (or (= nil el1) (= nil el2))
+        nil
+        (values el1 el2))))
+  yield)
 
 ;; String manipulation
 (fn array-str-concat [arr-of-str]
@@ -232,7 +235,25 @@
         (table.insert idxs (+ offset i)))))
   idxs)
 
-;; Number things
+
+;; Math
+(fn gcd [a b]
+  "greatest common divisor"
+  (if
+    (< a b) (gcd b a)
+    (divisible? a b) b
+    (gcd b (% a b))))
+
+(fn lcm [a b]
+  "lowest common multiple"
+  (* a (/ b (gcd a b))))
+
+(fn stirlings-approx [n]
+  (* (math.sqrt (prod [2 math.pi n])) (math.pow (/ n (math.exp 1)) n)))
+
+(fn fact-stirling [n k]
+  (/ (stirlings-approx n) (* (stirlings-approx k) (stirlings-approx (- n k)))))
+
 (fn natural-numbers-coroutine [?start ?end ?step]
   "natural numbers from 0 or start to infinity or end (inclusive)"
   (fn ns [n end step]
@@ -356,9 +377,9 @@
 (lambda print-time [f ?msg ...]
   "print runtime of f"
   (print (or ?msg f) "value and runtime:" (let [t0 (os.clock)
-                                      v (f ...)
-                                      dt (- (os.clock) t0)]
-                                  (values v dt))))
+                                                v (f ...)
+                                                dt (- (os.clock) t0)]
+                                            (values v dt))))
 
 
 ;; Exports
@@ -380,6 +401,7 @@
  : count
  : instances
  : keys
+ : zip
  : max
  : min
  : any
@@ -392,6 +414,7 @@
  : natural-numbers
  : fib-gen
  : Fn
+ : stirlings-approx
  : str-idx
  : split
  : num-divisors

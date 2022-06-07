@@ -195,6 +195,19 @@
 (h.print-time p14 14)
 
 
+;; PROBLEM 15
+; How many (only right or down) routes are there through a 20×20 grid?
+; (40 choose 20)
+;
+(fn p15 []
+  (local num (h.natural-numbers 21 40))
+  (local denom (h.natural-numbers 1 20))
+  (accumulate [p 1
+               n d (h.zip num denom)]
+    (* p (/ n d))))
+
+(h.print-time p15 15)
+
 ;; PROBLEM 22
 ; Sort the names and go from there
 (fn p22 []
@@ -214,10 +227,10 @@
 (fn p25 []
   (let [phi (/ (+ 1 (math.sqrt 5)) 2)]
     (math.ceil (/
-     (+ (/ (math.log (math.sqrt 5)) (math.log 10)) (- 1000 1))
-     (/ (math.log phi) (math.log 10))))))
+                (+ (/ (math.log (math.sqrt 5)) (math.log 10)) (- 1000 1))
+                (/ (math.log phi) (math.log 10))))))
 
-(p25)
+(h.print-time p25 25)
 
 ;; PROBLEM 40
 (fn p40 []
