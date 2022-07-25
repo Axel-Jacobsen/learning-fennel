@@ -250,3 +250,20 @@
       (* s (if (h.in interesting-digits i) e 1)))))
 
 (h.print-time p40 40)
+
+
+;; PROBLEM 42
+; tn = 0.5 * n * (n + 1)
+; c = {-1 \pm \sqrt{1 + 8c}} / 2
+(fn p42 []
+  (let [data (with-open [fin (io.open :data_inputs/p42_words.txt)]
+               (h.split (string.gsub (fin:read :*a) "\"" "") "(%w+)"))
+        letters "ABCDEFGHIJKLMNOPQRSTUVWXYZ"]
+    (length (h.filter data (fn [word]
+                             (h.triangle-num?
+                               (h.sum
+                                 (map
+                                   (h.split word)
+                                   #(string.find letters $)))))))))
+
+(h.print-time p42 42)

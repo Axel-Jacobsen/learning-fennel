@@ -16,6 +16,7 @@
 (fn tail [seq] "rest of seq" (table.unpack seq 2))
 (fn bool->int [bool] "false -> 0, true -> 1" (if bool 1 0))
 (fn int->bool [int]  "0 -> false, else true" (if (= 0 int) false true))
+(fn int? [int] "1 if int is an integer else 0" (= int (// int 1)))
 
 (fn any [seq func]
   "true if (func x) is true for any x in seq"
@@ -120,13 +121,12 @@
                _ s (ipairs arr-of-str)]
     (.. str s)))
 
-
 (fn str-idx [s i]
   (string.sub s i i))
 
-(fn split [str ?delimeter]
+(fn split [str ?capture]
   (let [t []
-        d (or ?delimeter ".")]
+        d (or ?capture ".")]
     (string.gsub str d #(table.insert t $))
     t))
 
@@ -292,6 +292,9 @@
   (local psi (- 1 phi))
   (/ (- (math.pow phi n) (math.pow psi n)) (math.sqrt 5)))
 
+(fn triangle-num? [n]
+  (int? (/ (- (math.sqrt (+ 1 (* 8 n))) 1) 2)))
+
 (fn prime-factors [P]
   (local factors [])
   (fn rip [n d]
@@ -376,10 +379,10 @@
 ;, Debuggers
 (lambda print-time [f ?msg ...]
   "print runtime of f"
-  (print (or ?msg f) "value and runtime:" (let [t0 (os.clock)
-                                                v (f ...)
-                                                dt (- (os.clock) t0)]
-                                            (values v dt))))
+  (let [t0 (os.clock)
+        v (f ...)
+        dt (- (os.clock) t0)]
+    (print (or ?msg f) "\t value " v "\t\t runtime " dt)))
 
 
 ;; Exports
@@ -396,6 +399,9 @@
  : ith!
  : head
  : tail
+ : int->bool
+ : bool->int
+ : int?
  : gcd
  : lcm
  : count
@@ -414,6 +420,7 @@
  : natural-numbers
  : fib-gen
  : Fn
+ : triangle-num?
  : stirlings-approx
  : str-idx
  : split
