@@ -8,6 +8,8 @@
 (local u (require :fennel.utils))
 
 ;; Basics
+(fn != [e1 e2] (not (= e1 e2)))
+(fn is-table? [maybe-table] (= "table" (type maybe-table)))
 (fn divisible? [v i] "true if v is divisible by i" (= 0 (% v i)))
 (fn even? [v] "true if v is even" (divisible? v 2))
 (fn odd? [v] "true if v is even" (not (even? v)))
@@ -33,6 +35,7 @@
 
 (fn in [seq value]
   (any seq #(= $ value)))
+
 
 ; this could be more general
 ; smth like val * kroneker-delta(f(val, seq)) where f returns a bool
@@ -103,8 +106,9 @@
         (tset instance-map ee 1))))
   instance-map)
 
-(fn keys [tbl]
-  (icollect [k _ (pairs tbl)] k))
+(fn keys [tbl] (icollect [k _ (pairs tbl)] k))
+
+(fn table-length [tbl] (length (keys tbl)))
 
 (fn zip [itr1 itr2]
   (fn yield []
@@ -114,6 +118,16 @@
         nil
         (values el1 el2))))
   yield)
+
+(fn deep-eq [e1 e2]
+  "true if e1 has all the same keys and all the same values as e2"
+  ; could be more efficient via shortcut eval
+  (if
+    (not (and (is-table? e1) (is-table? e2))) (= e1 e2)
+    (!= (table-length e1) (table-length e2)) false
+    (accumulate [is-eq true
+                 k1 v1 (pairs e1)]
+      (and is-eq (deep-eq v1 (. e2 k1))))))
 
 ;; String manipulation
 (fn array-str-concat [arr-of-str]
@@ -376,6 +390,17 @@
         prime-num)))
   rip)
 
+(fn primes-between [start-num end-num]
+  (var tbl [])
+  (let [pg (prime-gen end-num)]
+    (var p -1)
+    (while (< p start-num)
+      (set p (pg)))
+    (table.insert tbl p)
+    (each [p pg]
+      (table.insert tbl p))
+    tbl))
+
 ;, Debuggers
 (lambda print-time [f ?msg ...]
   "print runtime of f"
@@ -386,7 +411,9 @@
 
 
 ;; Exports
-{: divisible?
+{: !=
+ : is-table?
+ : divisible?
  : even?
  : odd?
  : prime?
@@ -407,6 +434,8 @@
  : count
  : instances
  : keys
+ : table-length
+ : deep-eq
  : zip
  : max
  : min
@@ -429,4 +458,5 @@
  : prime-gen-2
  : prime-gen-brute
  : prime-factors
+ : primes-between
  : print-time}
